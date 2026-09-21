@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 @MainActor
@@ -8,6 +9,7 @@ final class StatusBarController {
 
     private let downloadLabel = NSTextField(labelWithString: "")
     private let uploadLabel = NSTextField(labelWithString: "")
+    private var cancellable: AnyCancellable?
 
     init(model: NetworkModel) {
         self.model = model
@@ -17,17 +19,12 @@ final class StatusBarController {
         )
 
         configureView()
-        update()
 
-        NotificationCenter.default.addObserver(
-            forName: .init("NetSpeedModelDidChange"),
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in
-                self?.update()
+        cancellable = model.$reading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] reading in
+                self?.update(with: reading)
             }
-        }
     }
 
     private func configureView() {
@@ -76,15 +73,15 @@ final class StatusBarController {
         statusItem.menu = menu
     }
 
-    func update() {
+    private func update(with reading: NetworkReading) {
         downloadLabel.stringValue = format(
             arrow: "↓",
-            value: model.reading.downloadBytesPerSecond
+            value: reading.downloadBytesPerSecond
         )
 
         uploadLabel.stringValue = format(
             arrow: "↑",
-            value: model.reading.uploadBytesPerSecond
+            value: reading.uploadBytesPerSecond
         )
     }
 
