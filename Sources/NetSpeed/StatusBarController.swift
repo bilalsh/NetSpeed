@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// Copyright (C) 2026 Neo
+//
+// This file is part of NetSpeed, distributed under the terms of the
+// GNU General Public License version 3 or later. See LICENSE.
+
 import AppKit
 import Combine
 import SwiftUI
@@ -6,42 +13,57 @@ import SwiftUI
 final class StatusBarController {
     private let statusItem: NSStatusItem
     private let model: NetworkModel
+    private let settings: AppSettings
+    private let openSettings: () -> Void
 
     private let downloadLabel = NSTextField(labelWithString: "")
     private let uploadLabel = NSTextField(labelWithString: "")
-    private var cancellable: AnyCancellable?
+    private let stack = NSStackView()
 
-    init(model: NetworkModel) {
+    private var cancellables = Set<AnyCancellable>()
+
+    init(
+        model: NetworkModel,
+        settings: AppSettings,
+        openSettings: @escaping () -> Void
+    ) {
         self.model = model
+        self.settings = settings
+        self.openSettings = openSettings
 
         statusItem = NSStatusBar.system.statusItem(
             withLength: NSStatusItem.variableLength
         )
 
         configureView()
+        configureMenu()
+        update()
 
-        cancellable = model.$reading
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] reading in
-                self?.update(with: reading)
-            }
+        // Redraw when a new reading arrives or any preference changes.
+        // `objectWillChange` fires *before* the value is set, so hop to the
+        // next main-queue turn to read the settled values.
+        model.$reading
+            .sink { [weak self] _ in self?.scheduleUpdate() }
+            .store(in: &cancellables)
+
+        settings.objectWillChange
+            .sink { [weak self] _ in self?.scheduleUpdate() }
+            .store(in: &cancellables)
     }
+
+    // MARK: - View
 
     private func configureView() {
         guard let button = statusItem.button else {
             return
         }
 
-        let stack = NSStackView()
         stack.orientation = .vertical
         stack.alignment = .leading
         stack.spacing = 0
+        stack.translatesAutoresizingMaskIntoConstraints = false
 
         for label in [downloadLabel, uploadLabel] {
-            label.font = .monospacedDigitSystemFont(
-                ofSize: 10,
-                weight: .regular
-            )
             label.alignment = .left
             label.lineBreakMode = .byClipping
             label.translatesAutoresizingMaskIntoConstraints = false
@@ -49,41 +71,70 @@ final class StatusBarController {
         }
 
         button.subviews.forEach { $0.removeFromSuperview() }
-
-        stack.translatesAutoresizingMaskIntoConstraints = false
         button.addSubview(stack)
 
+        // Centre the stack vertically so a single visible line sits in the
+        // middle of the menu bar rather than hugging the top.
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: button.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: button.trailingAnchor),
-            stack.topAnchor.constraint(equalTo: button.topAnchor),
-            stack.bottomAnchor.constraint(equalTo: button.bottomAnchor)
+            stack.centerYAnchor.constraint(equalTo: button.centerYAnchor)
         ])
+    }
 
+    private func configureMenu() {
         let menu = NSMenu()
 
+        let settingsItem = NSMenuItem(
+            title: "Settings…",
+            action: #selector(showSettings),
+            keyEquivalent: ","
+        )
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
+        menu.addItem(.separator())
+
         let quitItem = NSMenuItem(
-            title: "Quit",
+            title: "Quit NetSpeed",
             action: #selector(quit),
             keyEquivalent: "q"
         )
         quitItem.target = self
-
         menu.addItem(quitItem)
+
         statusItem.menu = menu
     }
 
-    private func update(with reading: NetworkReading) {
+    private func scheduleUpdate() {
+        DispatchQueue.main.async { [weak self] in
+            self?.update()
+        }
+    }
+
+    func update() {
+        let font = NSFont.monospacedDigitSystemFont(
+            ofSize: settings.fontSize.points,
+            weight: .regular
+        )
+        downloadLabel.font = font
+        uploadLabel.font = font
+
         downloadLabel.stringValue = format(
             arrow: "↓",
-            value: reading.downloadBytesPerSecond
+            value: model.reading.downloadBytesPerSecond
         )
-
         uploadLabel.stringValue = format(
             arrow: "↑",
-            value: reading.uploadBytesPerSecond
+            value: model.reading.uploadBytesPerSecond
         )
+
+        // `AppSettings` guarantees at least one of these is visible.
+        downloadLabel.isHidden = !settings.showDownload
+        uploadLabel.isHidden = !settings.showUpload
     }
+
+    // MARK: - Formatting (unchanged behaviour)
 
     private func format(arrow: String, value: Double?) -> String {
         guard let value else {
@@ -112,6 +163,13 @@ final class StatusBarController {
         )
 
         return "\(arrow) \(formatted)/s"
+    }
+
+    // MARK: - Actions
+
+    @objc
+    private func showSettings() {
+        openSettings()
     }
 
     @objc
