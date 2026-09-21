@@ -8,6 +8,8 @@
   A tiny macOS menu-bar utility that displays current network download and upload speed.
 </p>
 
+[![Build](https://github.com/bilalsh/NetSpeed/actions/workflows/build.yml/badge.svg)](https://github.com/bilalsh/NetSpeed/actions/workflows/build.yml)
+
 Built for personal use on modern macOS.
 
 ## Display
@@ -29,7 +31,7 @@ Choose **Settings…** (⌘,) from the menu-bar item to configure:
 
 ## Build
 
-Requires Swift and macOS.
+Requires Swift 6.2 and macOS 26.
 
 ```sh
 ./build.sh
@@ -49,6 +51,7 @@ to right-click → **Open**.
 ## Project layout
 
 ```text
+.github/workflows/         CI build workflow
 Sources/NetSpeed/          Swift sources
 Resources/AppIcon.iconset  App icon at all macOS sizes (built into AppIcon.icns)
 docs/branding/             Icon and GitHub social-preview artwork (SVG + PNG)
