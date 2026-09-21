@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>NetSpeed app icon</title>
+  <defs>
+    <!-- Tile background: deep slate, slightly lighter at the top -->
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2B3245"/>
+      <stop offset="1" stop-color="#151A26"/>
+    </linearGradient>
+
+    <!-- Upload arrow: warm orange -->
+    <linearGradient id="up" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FDBA74"/>
+      <stop offset="1" stop-color="#F97316"/>
+    </linearGradient>
+
+    <!-- Download arrow: sky blue -->
+    <linearGradient id="down" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0EA5E9"/>
+      <stop offset="1" stop-color="#38BDF8"/>
+    </linearGradient>
+
+    <!-- Diagonal join carries traffic from orange to blue. Coordinates are in the glyph's local (pre-scale) space. -->
+    <linearGradient id="join" gradientUnits="userSpaceOnUse" x1="190" y1="168" x2="365" y2="340">
+      <stop offset="0" stop-color="#F97316"/>
+      <stop offset="1" stop-color="#0EA5E9"/>
+    </linearGradient>
+
+    <!-- Soft ambient glow behind the glyph -->
+    <radialGradient id="glow" cx="0.5" cy="0.45" r="0.55">
+      <stop offset="0" stop-color="#5B6B9A" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#5B6B9A" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Top-edge specular sheen for the tile -->
+    <linearGradient id="sheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.16"/>
+      <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Drop shadow for glyph -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="14" stdDeviation="16" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+
+    <clipPath id="tileClip">
+      <rect x="100" y="100" width="824" height="824" rx="185" ry="185"/>
+    </clipPath>
+  </defs>
+
+  <!-- macOS icon grid: 824x824 tile centered in 1024 canvas (100px margin) -->
+  <g filter="url(#shadow)">
+    <rect x="100" y="100" width="824" height="824" rx="185" ry="185" fill="url(#tile)"/>
+  </g>
+  <g clip-path="url(#tileClip)">
+    <rect x="100" y="100" width="824" height="824" fill="url(#glow)"/>
+    <rect x="100" y="100" width="824" height="412" fill="url(#sheen)"/>
+  </g>
+  <rect x="101" y="101" width="822" height="822" rx="184" ry="184"
+        fill="none" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="2"/>
+
+  <!--
+    The N glyph. Original artwork is 556x514; scaled by 0.90 and centered on the tile.
+    Tile center = (512, 512). Scaled size = 500.4 x 462.6, so origin = (261.8, 280.7).
+  -->
+  <g transform="translate(261.8 280.7) scale(0.9)" filter="url(#shadow)">
+    <!-- Left stem + up arrowhead (upload) -->
+    <path fill="url(#up)" d="
+      M 100 8 Q 118 0 136 14 L 228 124 Q 238 140 226 154 Q 218 162 204 162
+      L 158 162 L 158 480 Q 158 508 118 508 Q 78 508 78 480 L 78 162
+      L 34 162 Q 10 162 4 146 Q 0 132 12 120 L 98 10 Z"/>
+
+    <!-- Diagonal connector -->
+    <path fill="url(#join)" d="
+      M 178 182 L 210 182 Q 232 178 246 158 L 252 154 L 380 328
+      L 338 330 Q 322 336 308 352 Z"/>
+
+    <!-- Right stem + down arrowhead (download) -->
+    <path fill="url(#down)" d="
+      M 402 30 Q 402 4 440 4 Q 478 4 478 30 L 478 346 L 522 346
+      Q 546 348 552 364 Q 556 378 544 390 L 462 492 Q 444 514 420 498
+      L 336 396 Q 318 378 326 364 Q 332 348 352 346 L 402 346 Z"/>
+  </g>
+</svg>
