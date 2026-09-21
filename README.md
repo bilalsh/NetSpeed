@@ -15,6 +15,16 @@
 
 Built for personal use on modern macOS.
 
+<p align="center">
+  <img src="docs/screenshots/menu-bar-both.png" alt="NetSpeed showing download and upload speed in the menu bar">
+  &nbsp;&nbsp;&nbsp;
+  <img src="docs/screenshots/menu-bar-download-only.png" alt="NetSpeed showing only download speed in the menu bar">
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/settings.png" width="380" alt="NetSpeed settings window">
+</p>
+
 ## Display
 
 ```text
