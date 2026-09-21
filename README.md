@@ -8,7 +8,10 @@
   A tiny macOS menu-bar utility that displays current network download and upload speed.
 </p>
 
-[![Build](https://github.com/bilalsh/NetSpeed/actions/workflows/build.yml/badge.svg)](https://github.com/bilalsh/NetSpeed/actions/workflows/build.yml)
+<p align="center">
+  <a href="https://github.com/bilalsh/NetSpeed/actions/workflows/build.yml"><img src="https://github.com/bilalsh/NetSpeed/actions/workflows/build.yml/badge.svg" alt="Build"></a>
+  <a href="https://github.com/bilalsh/NetSpeed/releases/latest"><img src="https://img.shields.io/github/v/release/bilalsh/NetSpeed" alt="Release"></a>
+</p>
 
 Built for personal use on modern macOS.
 
@@ -29,6 +32,12 @@ Choose **Settings…** (⌘,) from the menu-bar item to configure:
 - **Font size**: Small (9 pt), Medium (10 pt, default) or Large (11 pt).
 - **Launch at login**: enabled automatically on first run; turn it off any time.
 
+## Download
+
+Grab the latest `NetSpeed-x.y.z.zip` from the [Releases](https://github.com/bilalsh/NetSpeed/releases/latest) page, unzip it, and move `NetSpeed.app` to `/Applications`. Moving it there before first launch means launch-at-login points at a stable location.
+
+The app is ad-hoc signed and not notarized, so on first launch right-click → **Open** (or run `xattr -cr /Applications/NetSpeed.app`).
+
 ## Build
 
 Requires Swift 6.2 and macOS 26.
@@ -45,13 +54,10 @@ and install to `/Applications`:
 ./build.sh --install
 ```
 
-The app is ad-hoc signed. It is not notarized, so on first launch you may need
-to right-click → **Open**.
-
 ## Project layout
 
 ```text
-.github/workflows/         CI build workflow
+.github/workflows/         CI build and release workflows
 Sources/NetSpeed/          Swift sources
 Resources/AppIcon.iconset  App icon at all macOS sizes (built into AppIcon.icns)
 docs/branding/             Icon and GitHub social-preview artwork (SVG + PNG)
@@ -65,10 +71,10 @@ The master artwork is `docs/branding/app-icon.svg`. The rendered icon set in
 `Resources/AppIcon.iconset` is committed, and `build.sh` turns it into
 `AppIcon.icns` with `iconutil`.
 
-To change the icon, edit the SVG, export it as PNGs at the ten sizes macOS
-expects (16, 32, 64, 128, 256, 512 and 1024 px, named `icon_16x16.png`,
-`icon_16x16@2x.png`, and so on) into `Resources/AppIcon.iconset`, and rebuild.
-Use a renderer with full SVG filter support, such as Chromium or Inkscape.
+To change the icon, edit the SVG, export it as PNGs at the sizes macOS expects
+(16, 32, 128, 256 and 512 px, each with an `@2x` variant, e.g. `icon_16x16.png`
+and `icon_16x16@2x.png`) into `Resources/AppIcon.iconset`, and rebuild. Use a
+renderer with full SVG filter support, such as Chromium or Inkscape.
 
 ## Notes
 
