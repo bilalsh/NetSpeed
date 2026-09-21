@@ -18,11 +18,6 @@ final class NetworkModel: ObservableObject {
                 let now = ProcessInfo.processInfo.systemUptime
                 reading = sampler.sample(now: now)
 
-                NotificationCenter.default.post(
-                    name: .init("NetSpeedModelDidChange"),
-                    object: nil
-                )
-
                 try? await Task.sleep(for: .seconds(1))
             }
         }
