@@ -10,6 +10,7 @@ xcuserdata/
 
 # Build products
 *.app
+AppIcon.icns
 
 # macOS
 .DS_Store
