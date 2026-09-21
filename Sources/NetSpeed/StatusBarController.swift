@@ -7,7 +7,6 @@
 
 import AppKit
 import Combine
-import SwiftUI
 
 @MainActor
 final class StatusBarController {
