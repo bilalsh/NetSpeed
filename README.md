@@ -27,9 +27,19 @@ Built for personal use on modern macOS.
 
 ## Display
 
+A small monochrome icon sits to the left of the readout. When both download
+and upload are shown, they stack as two lines:
+
 ```text
 ↓ 1.2 MB/s
 ↑ 84 kB/s
+```
+
+When only one is enabled, it shows as a single line instead, since there's
+no second line to make room for:
+
+```text
+↓ 1.2 MB/s
 ```
 
 Traffic below 1 KiB/s is displayed as 1 kB/s when non-zero.
