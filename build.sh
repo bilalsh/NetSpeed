@@ -15,8 +15,8 @@ set -euo pipefail
 
 APP_NAME="NetSpeed"
 BUNDLE_ID="local.netspeed"
-VERSION="0.2.1"
-BUILD_NUMBER="3"
+VERSION="0.2.2"
+BUILD_NUMBER="4"
 
 BUILD_DIR=".build/release"
 APP_DIR="${APP_NAME}.app"
