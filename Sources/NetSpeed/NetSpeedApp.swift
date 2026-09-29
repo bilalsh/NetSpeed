@@ -21,9 +21,15 @@ final class NetworkModel: ObservableObject {
         samplingTask = Task { [weak self] in
             guard let self else { return }
 
+            // `systemUptime` pauses during sleep, so a sleep/wake looks like ~1s
+            // and defeats the sampler's `maximumGap`. `ContinuousClock` keeps
+            // counting through sleep.
+            let clock = ContinuousClock()
+            let start = clock.now
+
             while !Task.isCancelled {
-                let now = ProcessInfo.processInfo.systemUptime
-                reading = sampler.sample(now: now)
+                let elapsed = clock.now - start
+                reading = sampler.sample(now: elapsed.timeInterval)
 
                 try? await Task.sleep(for: .seconds(1))
             }
@@ -33,6 +39,13 @@ final class NetworkModel: ObservableObject {
     func stop() {
         samplingTask?.cancel()
         samplingTask = nil
+    }
+}
+
+private extension Duration {
+    var timeInterval: TimeInterval {
+        let (seconds, attoseconds) = components
+        return Double(seconds) + Double(attoseconds) / 1e18
     }
 }
 
