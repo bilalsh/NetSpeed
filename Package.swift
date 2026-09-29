@@ -16,6 +16,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "NetSpeed"
+        ),
+        .testTarget(
+            name: "NetSpeedTests",
+            dependencies: ["NetSpeed"]
         )
     ]
 )

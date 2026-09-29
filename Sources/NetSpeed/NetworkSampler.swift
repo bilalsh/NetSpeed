@@ -11,6 +11,12 @@
 
 import Foundation
 
+/// Narrow seam over `NetworkCounterReader.read()` so `NetworkSampler` can be
+/// unit tested with a scripted reader instead of real system interfaces.
+protocol NetworkCounterReaderProtocol {
+    func read() -> NetworkCounters?
+}
+
 struct NetworkReading: Sendable {
     let downloadBytesPerSecond: Double?
     let uploadBytesPerSecond: Double?
@@ -23,7 +29,7 @@ struct NetworkReading: Sendable {
 
 final class NetworkSampler {
 
-    private let reader: NetworkCounterReader
+    private let reader: NetworkCounterReaderProtocol
 
     private var previous: (
         counters: NetworkCounters,
@@ -34,7 +40,7 @@ final class NetworkSampler {
     // the entire gap. Establish a fresh baseline instead.
     private let maximumGap: TimeInterval = 10
 
-    init(reader: NetworkCounterReader = NetworkCounterReader()) {
+    init(reader: NetworkCounterReaderProtocol = NetworkCounterReader()) {
         self.reader = reader
     }
 

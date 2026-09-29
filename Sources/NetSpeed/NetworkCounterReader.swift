@@ -16,7 +16,7 @@ struct NetworkCounters: Equatable, Sendable {
     var sent: UInt64 = 0
 }
 
-struct NetworkCounterReader {
+struct NetworkCounterReader: NetworkCounterReaderProtocol {
 
     func read() -> NetworkCounters? {
         var mib: [Int32] = [
