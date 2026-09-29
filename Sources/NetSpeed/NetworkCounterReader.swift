@@ -28,31 +28,33 @@ struct NetworkCounterReader {
             0
         ]
 
+        // The interface list can grow between the size query and the fetch
+        // (VPN connects, tethering attaches), making the second sysctl fail
+        // with ENOMEM. Retry with a fresh size instead of dropping the sample,
+        // which would show a one-tick "—" in the menu bar.
+        var buffer: [UInt8] = []
         var length = 0
+        var fetched = false
 
-        guard sysctl(
-            &mib,
-            6,
-            nil,
-            &length,
-            nil,
-            0
-        ) == 0, length > 0 else {
+        for _ in 0..<3 {
+            length = 0
+
+            guard sysctl(&mib, 6, nil, &length, nil, 0) == 0, length > 0 else {
             return nil
         }
 
-        var buffer = [UInt8](repeating: 0, count: length)
+            buffer = [UInt8](repeating: 0, count: length)
 
-        guard sysctl(
-            &mib,
-            6,
-            &buffer,
-            &length,
-            nil,
-            0
-        ) == 0 else {
-            return nil
+            if sysctl(&mib, 6, &buffer, &length, nil, 0) == 0 {
+                fetched = true
+                break
+            }
+
+            // Only "buffer too small" is worth retrying.
+            guard errno == ENOMEM else { return nil }
         }
+
+        guard fetched else { return nil }
 
         var counters = NetworkCounters()
 
