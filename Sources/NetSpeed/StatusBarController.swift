@@ -135,6 +135,20 @@ final class StatusBarController {
 
         contentView.image = image
         contentWidthConstraint.constant = image.size.width
+
+        // The image is a template glyph with no semantic text, so VoiceOver
+        // needs an explicit spoken description of the current reading.
+        statusItem.button?.setAccessibilityLabel(accessibilityDescription(lines: lines))
+    }
+
+    private func accessibilityDescription(lines: [String]) -> String {
+        // Reuse the same arrow-prefixed strings but spell them out:
+        // "↓ 1.2 MB/s" -> "Download 1.2 MB per second"
+        lines.map { line in
+            line.hasPrefix("↓")
+                ? "Download " + line.dropFirst(2)
+                : "Upload " + line.dropFirst(2)
+        }.joined(separator: ", ")
     }
 
     // MARK: - Rendering
