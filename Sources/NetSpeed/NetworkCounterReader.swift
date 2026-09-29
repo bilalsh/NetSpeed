@@ -16,7 +16,13 @@ struct NetworkCounters: Equatable, Sendable {
     var sent: UInt64 = 0
 }
 
-struct NetworkCounterReader: NetworkCounterReaderProtocol {
+final class NetworkCounterReader: NetworkCounterReaderProtocol {
+
+    // Interface indices are stable for the life of the process except on
+    // hardware changes (USB Ethernet plug/unplug, VPN connect, etc.), which
+    // are rare. Caching avoids an `if_indextoname` syscall per interface,
+    // per sample, forever.
+    private var nameCache: [UInt32: String] = [:]
 
     func read() -> NetworkCounters? {
         var mib: [Int32] = [
@@ -87,28 +93,33 @@ struct NetworkCounterReader: NetworkCounterReaderProtocol {
                         .assumingMemoryBound(to: if_msghdr2.self)
                         .pointee
 
-                    var nameBuffer = [CChar](
-                        repeating: 0,
-                        count: Int(IFNAMSIZ)
-                    )
+                    let index = UInt32(info.ifm_index)
+                    let interfaceName: String?
 
-                    if if_indextoname(
-                        UInt32(info.ifm_index),
-                        &nameBuffer
-                    ) != nil {
-                        let name = nameBuffer.prefix {
-                            $0 != 0
-                        }
-
-                        let interfaceName = String(
-                            decoding: name.map { UInt8(bitPattern: $0) },
-                            as: UTF8.self
+                    if let cached = nameCache[index] {
+                        interfaceName = cached
+                    } else {
+                        var nameBuffer = [CChar](
+                            repeating: 0,
+                            count: Int(IFNAMSIZ)
                         )
 
-                        if Self.shouldInclude(interface: interfaceName) {
-                            counters.received += info.ifm_data.ifi_ibytes
-                            counters.sent += info.ifm_data.ifi_obytes
+                        if if_indextoname(index, &nameBuffer) != nil {
+                            let name = nameBuffer.prefix { $0 != 0 }
+                            let resolved = String(
+                                decoding: name.map { UInt8(bitPattern: $0) },
+                                as: UTF8.self
+                            )
+                            nameCache[index] = resolved
+                            interfaceName = resolved
+                        } else {
+                            interfaceName = nil
                         }
+                    }
+
+                    if let interfaceName, Self.shouldInclude(interface: interfaceName) {
+                        counters.received += info.ifm_data.ifi_ibytes
+                        counters.sent += info.ifm_data.ifi_obytes
                     }
                 }
 
