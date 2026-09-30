@@ -67,8 +67,11 @@ open NetSpeed.app
 - Generates `Info.plist` from the `VERSION` / `BUILD_NUMBER` vars at the top of the script
 - Ad-hoc signs the bundle and verifies the signature
 
-There is no separate test command yet — no test target exists (see
-"Known gaps / open questions" below).
+Run the unit tests with:
+
+```sh
+swift test   # requires Xcode, not just Command Line Tools
+```
 
 ## Coding style and standards
 
@@ -120,9 +123,16 @@ There is no separate test command yet — no test target exists (see
   same traffic isn't double-counted. If you add support for a new kind of
   virtual interface on macOS, extend `excludedPrefixes` rather than
   changing the overall approach.
-- **Counter resets/decreases are treated as zero rate**, not a spike, in
-  both `NetworkSampler` and the reader. Preserve this when touching the
-  sampling math.
+- **`NetworkCounterReader` is a `class`, not a `struct`**, so its
+  `nameCache` can persist across calls to `read()`. Interface indices are
+  stable for the life of the process; the cache avoids an `if_indextoname`
+  syscall per interface on every one-second sample. Don't revert it to a
+  struct.
+- **`NetworkCounterReaderProtocol`** is defined in `NetworkSampler.swift`
+  as a narrow seam for unit testing. `NetworkSampler` takes the protocol,
+  not the concrete type, so tests can inject a scripted stub. Keep this
+  indirection — don't widen the protocol or collapse it back to the
+  concrete type.
 
 ## Git workflow
 
@@ -238,10 +248,6 @@ contribution process in mind.
 
 ## Known gaps / open questions
 
-- No unit test target exists yet. A test target for `NetworkSampler` has
-  been discussed, but the executable target would likely need to be
-  restructured into a library target first — don't assume `swift test`
-  works without checking `Package.swift` first.
 - If you add CI changes, note the required status check name is tied to the
   branch ruleset on `main` — renaming the build job will break the ruleset
   until it's updated to match.
