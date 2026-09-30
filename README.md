@@ -65,6 +65,9 @@ Requires Swift 6.2 and macOS 26.
 ```sh
 ./build.sh
 open NetSpeed.app
+
+# Run the unit tests (requires Xcode, not just Command Line Tools):
+swift test
 ```
 
 Launch-at-login registers the app's location, so for a stable login item build
